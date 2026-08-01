@@ -9,6 +9,8 @@ use std::sync::OnceLock;
 // Global driver fd cache
 static DRIVER_FD: OnceLock<RawFd> = OnceLock::new();
 static INFO_CACHE: OnceLock<ksu_uapi::ksu_get_info_cmd> = OnceLock::new();
+const KSU_INSTALL_MAGIC1_LEGACY: libc::c_ulong = 0xDEADBEEF;
+const KSU_INSTALL_MAGIC2_LEGACY: libc::c_ulong = 0xCAFEBABE;
 
 fn scan_driver_fd() -> Option<RawFd> {
     let fd_dir = fs::read_dir("/proc/self/fd").ok()?;
@@ -46,8 +48,8 @@ fn init_driver_fd() -> Option<RawFd> {
             unsafe {
                 libc::syscall(
                     libc::SYS_reboot,
-                    ksu_uapi::KSU_INSTALL_MAGIC1_LEGACY,
-                    ksu_uapi::KSU_INSTALL_MAGIC2_LEGACY,
+                    KSU_INSTALL_MAGIC1_LEGACY,
+                    KSU_INSTALL_MAGIC2_LEGACY,
                     0,
                     &mut fd,
                 );
