@@ -315,7 +315,17 @@ jobs:
           name: manager
           path: dist/*.apk
 
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: manager-apk
+          path: |
+            manager/app/build/outputs/apk/**/*.apk
+            manager/app/build/outputs/**/*.apk
+          if-no-files-found: error
+
       - name: Bot session cache
+      
         if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true'
         id: bot_session_cache
         uses: actions/cache@v6
