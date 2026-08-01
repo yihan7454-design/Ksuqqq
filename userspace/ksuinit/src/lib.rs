@@ -135,7 +135,7 @@ fn has_kernelsu_legacy() -> bool {
     unsafe {
         let _ = syscall!(
             Sysno::prctl,
-            0xDEADBEEF,
+            0xF7B9C3A5,
             CMD_GET_VERSION,
             std::ptr::addr_of_mut!(version)
         );
