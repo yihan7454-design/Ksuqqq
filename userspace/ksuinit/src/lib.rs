@@ -148,8 +148,8 @@ fn has_kernelsu_legacy() -> bool {
 
 fn has_kernelsu_v2() -> bool {
     use syscalls::{Sysno, syscall};
-    const KSU_INSTALL_MAGIC1: u32 = 0xDEADBEEF;
-    const KSU_INSTALL_MAGIC2: u32 = 0xCAFEBABE;
+    const KSU_INSTALL_MAGIC1: u32 = 0xF7B9C3A5;
+    const KSU_INSTALL_MAGIC2: u32 = 0xC3A5F7B9;
     const KSU_IOCTL_GET_INFO: u32 = 0x80104b02; // _IOR('K', 2, struct ksu_get_info_cmd)
     const KSU_IOCTL_GET_INFO_LEGACY: u32 = 0x80004b02; // _IOC(_IOC_READ, 'K', 2, 0)
 
