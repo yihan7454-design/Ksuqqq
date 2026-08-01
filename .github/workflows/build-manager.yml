@@ -204,6 +204,15 @@ jobs:
           name: manager-gradle
           path: manager/app/build/outputs/apk/release/*.apk
 
+      - name: Upload APK directly
+        uses: actions/upload-artifact@v7
+        with:
+          name: manager-gradle-apk
+          path: |
+            manager/app/build/outputs/apk/**/*.apk
+            manager/app/build/outputs/**/*.apk
+          if-no-files-found: error
+
       - name: Upload mappings
         uses: actions/upload-artifact@v7
         if: ${{ ( github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' )) || github.ref_type == 'tag' }}
@@ -286,29 +295,29 @@ jobs:
             echo "SIGN_KEYSTORE_PASSWORD=$PR_KEYSTORE_PASSWORD" >> $GITHUB_ENV
             echo "SIGN_KEY_PASSWORD=$PR_KEY_PASSWORD" >> $GITHUB_ENV
           else
-    if [ -z "$PROD_KEYSTORE" ]; then
-    keytool -genkeypair \
-      -alias temp-key \
-      -keyalg RSA -keysize 2048 \
-      -validity 3650 \
-      -storepass temp-password \
-      -keypass temp-password \
-      -dname "CN=KernelSU Temp Build" \
-      -storetype JKS \
-      -keystore temp-key.jks
+            if [ -z "$PROD_KEYSTORE" ]; then
+              keytool -genkeypair \
+                -alias temp-key \
+                -keyalg RSA -keysize 2048 \
+                -validity 3650 \
+                -storepass temp-password \
+                -keypass temp-password \
+                -dname "CN=KernelSU Temp Build" \
+                -storetype JKS \
+                -keystore temp-key.jks
 
-    echo "SIGN_KEYSTORE_FILE=temp-key.jks" >> $GITHUB_ENV
-    echo "SIGN_KEY_ALIAS=temp-key" >> $GITHUB_ENV
-    echo "SIGN_KEYSTORE_PASSWORD=temp-password" >> $GITHUB_ENV
-    echo "SIGN_KEY_PASSWORD=temp-password" >> $GITHUB_ENV
-  else
-    echo "$PROD_KEYSTORE" | base64 -d > key.jks
-    echo "SIGN_KEYSTORE_FILE=key.jks" >> $GITHUB_ENV
-    echo "SIGN_KEY_ALIAS=$PROD_KEY_ALIAS" >> $GITHUB_ENV
-    echo "SIGN_KEYSTORE_PASSWORD=$PROD_KEYSTORE_PASSWORD" >> $GITHUB_ENV
-    echo "SIGN_KEY_PASSWORD=$PROD_KEY_PASSWORD" >> $GITHUB_ENV
-  fi
-fi
+              echo "SIGN_KEYSTORE_FILE=temp-key.jks" >> $GITHUB_ENV
+              echo "SIGN_KEY_ALIAS=temp-key" >> $GITHUB_ENV
+              echo "SIGN_KEYSTORE_PASSWORD=temp-password" >> $GITHUB_ENV
+              echo "SIGN_KEY_PASSWORD=temp-password" >> $GITHUB_ENV
+            else
+              echo "$PROD_KEYSTORE" | base64 -d > key.jks
+              echo "SIGN_KEYSTORE_FILE=key.jks" >> $GITHUB_ENV
+              echo "SIGN_KEY_ALIAS=$PROD_KEY_ALIAS" >> $GITHUB_ENV
+              echo "SIGN_KEYSTORE_PASSWORD=$PROD_KEYSTORE_PASSWORD" >> $GITHUB_ENV
+              echo "SIGN_KEY_PASSWORD=$PROD_KEY_PASSWORD" >> $GITHUB_ENV
+            fi
+          fi
 
       - name: Repack and resign
         if: ${{ github.event_name == 'pull_request' || (github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')) || github.ref_type == 'tag' }}
@@ -331,17 +340,7 @@ fi
           name: manager
           path: dist/*.apk
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: manager-apk
-          path: |
-            manager/app/build/outputs/apk/**/*.apk
-            manager/app/build/outputs/**/*.apk
-          if-no-files-found: error
-
       - name: Bot session cache
-      
         if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true'
         id: bot_session_cache
         uses: actions/cache@v6
