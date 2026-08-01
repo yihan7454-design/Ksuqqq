@@ -57,7 +57,7 @@ inline std::pair<int, int> legacy_get_info() {
     int32_t version = -1;
     int32_t flags = 0;
     int32_t result = 0;
-    prctl(0xDEADBEEF, 2, &version, &flags, &result);
+    prctl(0xF7B9C3A5, 2, &version, &flags, &result);
     return {version, flags};
 }
 
