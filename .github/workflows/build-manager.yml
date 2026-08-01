@@ -286,13 +286,29 @@ jobs:
             echo "SIGN_KEYSTORE_PASSWORD=$PR_KEYSTORE_PASSWORD" >> $GITHUB_ENV
             echo "SIGN_KEY_PASSWORD=$PR_KEY_PASSWORD" >> $GITHUB_ENV
           else
-            test -n "$PROD_KEYSTORE"
-            echo "$PROD_KEYSTORE" | base64 -d > key.jks
-            echo "SIGN_KEYSTORE_FILE=key.jks" >> $GITHUB_ENV
-            echo "SIGN_KEY_ALIAS=$PROD_KEY_ALIAS" >> $GITHUB_ENV
-            echo "SIGN_KEYSTORE_PASSWORD=$PROD_KEYSTORE_PASSWORD" >> $GITHUB_ENV
-            echo "SIGN_KEY_PASSWORD=$PROD_KEY_PASSWORD" >> $GITHUB_ENV
-          fi
+    if [ -z "$PROD_KEYSTORE" ]; then
+    keytool -genkeypair \
+      -alias temp-key \
+      -keyalg RSA -keysize 2048 \
+      -validity 3650 \
+      -storepass temp-password \
+      -keypass temp-password \
+      -dname "CN=KernelSU Temp Build" \
+      -storetype JKS \
+      -keystore temp-key.jks
+
+    echo "SIGN_KEYSTORE_FILE=temp-key.jks" >> $GITHUB_ENV
+    echo "SIGN_KEY_ALIAS=temp-key" >> $GITHUB_ENV
+    echo "SIGN_KEYSTORE_PASSWORD=temp-password" >> $GITHUB_ENV
+    echo "SIGN_KEY_PASSWORD=temp-password" >> $GITHUB_ENV
+  else
+    echo "$PROD_KEYSTORE" | base64 -d > key.jks
+    echo "SIGN_KEYSTORE_FILE=key.jks" >> $GITHUB_ENV
+    echo "SIGN_KEY_ALIAS=$PROD_KEY_ALIAS" >> $GITHUB_ENV
+    echo "SIGN_KEYSTORE_PASSWORD=$PROD_KEYSTORE_PASSWORD" >> $GITHUB_ENV
+    echo "SIGN_KEY_PASSWORD=$PROD_KEY_PASSWORD" >> $GITHUB_ENV
+  fi
+fi
 
       - name: Repack and resign
         if: ${{ github.event_name == 'pull_request' || (github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')) || github.ref_type == 'tag' }}
