@@ -42,6 +42,17 @@ fn init_driver_fd() -> Option<RawFd> {
                 &mut fd,
             );
         };
+        if fd < 0 {
+            unsafe {
+                libc::syscall(
+                    libc::SYS_reboot,
+                    ksu_uapi::KSU_INSTALL_MAGIC1_LEGACY,
+                    ksu_uapi::KSU_INSTALL_MAGIC2_LEGACY,
+                    0,
+                    &mut fd,
+                );
+            };
+        }
         if fd >= 0 { Some(fd) } else { None }
     } else {
         fd
