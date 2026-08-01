@@ -12,6 +12,8 @@ static const __u32 KERNEL_SU_UAPI_VERSION = 2;
 /* Magic numbers for reboot hook to install fd */
 static const __u32 KSU_INSTALL_MAGIC1 = 0xF7B9C3A5;
 static const __u32 KSU_INSTALL_MAGIC2 = 0xC3A5F7B9;
+static const __u32 KSU_INSTALL_MAGIC1_LEGACY = 0xDEADBEEF;
+static const __u32 KSU_INSTALL_MAGIC2_LEGACY = 0xCAFEBABE;
 
 struct ksu_become_daemon_cmd {
     __u8 token[65]; /* Input: daemon token (null-terminated) */
