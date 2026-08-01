@@ -10,6 +10,7 @@
 #include <sys/prctl.h>
 #include <utility>
 
+#include "uapi/app_profile.h"
 #include "uapi/ksu.h"
 
 uint32_t get_kernel_uapi_version();

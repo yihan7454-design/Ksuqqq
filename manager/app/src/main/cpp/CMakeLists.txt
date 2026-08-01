@@ -16,7 +16,10 @@ add_library(kernelsu
         ksu.cc
         )
 
-target_include_directories(kernelsu PRIVATE .)
+target_include_directories(kernelsu PRIVATE
+        .
+        ../../../../..
+        )
 
 find_library(log-lib log)
 
