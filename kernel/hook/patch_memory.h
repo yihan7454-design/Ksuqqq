@@ -18,7 +18,7 @@
 #include "asm/insn.h" // IWYU pragma: keep
 #endif
 #elif __x86_64__
-#include <asm/ptrace.h>
+#include "asm/text-patching.h" // IWYU pragma: keep
 #else
 #error "Unsupported arch"
 #endif

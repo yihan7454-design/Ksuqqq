@@ -74,25 +74,19 @@ static int ksu_sha256(const unsigned char *data, unsigned int datalen, unsigned 
 static bool check_block(struct file *fp, u32 *size4, loff_t *pos, u32 *offset, unsigned expected_size,
                         const char *expected_sha256)
 {
-    if (kernel_read(fp, size4, 0x4, pos) != 0x4) // signer-sequence length
-        return false;
-    if (kernel_read(fp, size4, 0x4, pos) != 0x4) // signer length
-        return false;
-    if (kernel_read(fp, size4, 0x4, pos) != 0x4) // signed data length
-        return false;
+    kernel_read(fp, size4, 0x4, pos); // signer-sequence length
+    kernel_read(fp, size4, 0x4, pos); // signer length
+    kernel_read(fp, size4, 0x4, pos); // signed data length
 
     *offset += 0x4 * 3;
 
-    if (kernel_read(fp, size4, 0x4, pos) != 0x4) // digests-sequence length
-        return false;
+    kernel_read(fp, size4, 0x4, pos); // digests-sequence length
 
     *pos += *size4;
     *offset += 0x4 + *size4;
 
-    if (kernel_read(fp, size4, 0x4, pos) != 0x4) // certificates length
-        return false;
-    if (kernel_read(fp, size4, 0x4, pos) != 0x4) // certificate length
-        return false;
+    kernel_read(fp, size4, 0x4, pos); // certificates length
+    kernel_read(fp, size4, 0x4, pos); // certificate length
     *offset += 0x4 * 2;
 
     if (*size4 == expected_size) {
@@ -104,10 +98,7 @@ static bool check_block(struct file *fp, u32 *size4, loff_t *pos, u32 *offset, u
             pr_info("cert length overlimit\n");
             return false;
         }
-        if (kernel_read(fp, cert, *size4, pos) != *size4) {
-            pr_info("read cert failed\n");
-            return false;
-        }
+        kernel_read(fp, cert, *size4, pos);
         unsigned char digest[SHA256_DIGEST_SIZE];
         if (IS_ERR(ksu_sha256(cert, *size4, digest))) {
             pr_info("sha256 error\n");
@@ -218,25 +209,17 @@ static __always_inline bool check_v2_signature(char *path, unsigned expected_siz
 
     pos += 12;
     // offset
-    if (kernel_read(fp, &size4, 0x4, &pos) != 0x4) {
-        goto clean;
-    }
+    kernel_read(fp, &size4, 0x4, &pos);
     pos = size4 - 0x18;
 
-    if (kernel_read(fp, &size8, 0x8, &pos) != 0x8) {
-        goto clean;
-    }
-    if (kernel_read(fp, buffer, 0x10, &pos) != 0x10) {
-        goto clean;
-    }
+    kernel_read(fp, &size8, 0x8, &pos);
+    kernel_read(fp, buffer, 0x10, &pos);
     if (strcmp((char *)buffer, "APK Sig Block 42")) {
         goto clean;
     }
 
     pos = size4 - (size8 + 0x8);
-    if (kernel_read(fp, &size_of_block, 0x8, &pos) != 0x8) {
-        goto clean;
-    }
+    kernel_read(fp, &size_of_block, 0x8, &pos);
     if (size_of_block != size8) {
         goto clean;
     }
@@ -245,17 +228,12 @@ static __always_inline bool check_v2_signature(char *path, unsigned expected_siz
     while (loop_count++ < 10) {
         uint32_t id;
         uint32_t offset;
-        if (kernel_read(fp, &size8, 0x8, &pos) != 0x8) { // sequence length
-            v2_signing_valid = false;
-            goto clean;
-        }
+        kernel_read(fp, &size8, 0x8,
+                    &pos); // sequence length
         if (size8 == size_of_block) {
             break;
         }
-        if (kernel_read(fp, &id, 0x4, &pos) != 0x4) { // id
-            v2_signing_valid = false;
-            goto clean;
-        }
+        kernel_read(fp, &id, 0x4, &pos); // id
         offset = 4;
         if (id == 0x7109871au) {
             v2_signing_blocks++;

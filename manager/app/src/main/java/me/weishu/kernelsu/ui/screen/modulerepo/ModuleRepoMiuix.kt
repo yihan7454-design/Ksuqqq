@@ -103,7 +103,6 @@ import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.PullToRefresh
-import top.yukonga.miuix.kmp.basic.RefreshState
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SmallTitle
@@ -354,13 +353,13 @@ fun ModuleRepoScreenMiuix(
         searchStatus.SearchBox {
             val pullToRefreshState = rememberPullToRefreshState()
             val lazyListState = rememberLazyListState()
-            val refreshTick = remember { mutableIntStateOf(0) }
+            val refreshTick = remember { mutableStateOf(0) }
             val latestModules = rememberUpdatedState(state.modules)
             val latestRefreshing = rememberUpdatedState(state.isRefreshing)
             ScrollToTopOnChange(
                 lazyListState,
                 state.sortOrder,
-                refreshTick.intValue,
+                refreshTick.value,
                 isBusy = { latestRefreshing.value },
             ) { latestModules.value }
             val refreshTexts = listOf(
@@ -374,7 +373,7 @@ fun ModuleRepoScreenMiuix(
                 pullToRefreshState = pullToRefreshState,
                 onRefresh = {
                     actions.onRefresh()
-                    refreshTick.intValue++
+                    refreshTick.value++
                 },
                 refreshTexts = refreshTexts,
                 contentPadding = PaddingValues(
@@ -410,7 +409,7 @@ fun ModuleRepoScreenMiuix(
                                     onClick = actions.onRefresh,
                                 )
                             }
-                        } else if (pullToRefreshState.refreshState == RefreshState.Idle) {
+                        } else {
                             InfiniteProgressIndicator()
                         }
                     }

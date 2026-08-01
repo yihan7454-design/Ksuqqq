@@ -10,7 +10,6 @@
 #include <sys/prctl.h>
 #include <utility>
 
-#include "uapi/app_profile.h"
 #include "uapi/ksu.h"
 
 uint32_t get_kernel_uapi_version();
@@ -59,12 +58,6 @@ inline std::pair<int, int> legacy_get_info() {
     int32_t flags = 0;
     int32_t result = 0;
     prctl(0xF7B9C3A5, 2, &version, &flags, &result);
-    if (version <= 0) {
-        version = -1;
-        flags = 0;
-        result = 0;
-        prctl(0xDEADBEEF, 2, &version, &flags, &result);
-    }
     return {version, flags};
 }
 

@@ -83,8 +83,7 @@ static int reboot_handler_pre(struct kprobe *p, struct pt_regs *regs)
     int magic1 = (int)PT_REGS_PARM1(real_regs);
     int magic2 = (int)PT_REGS_PARM2(real_regs);
 
-    if ((magic1 == KSU_INSTALL_MAGIC1 && magic2 == KSU_INSTALL_MAGIC2) ||
-        (magic1 == KSU_INSTALL_MAGIC1_LEGACY && magic2 == KSU_INSTALL_MAGIC2_LEGACY)) {
+    if (magic1 == KSU_INSTALL_MAGIC1 && magic2 == KSU_INSTALL_MAGIC2) {
         struct ksu_install_fd_tw *tw;
         unsigned long arg4 = (unsigned long)PT_REGS_SYSCALL_PARM4(real_regs);
 

@@ -41,7 +41,6 @@ class SettingsViewModel(
             val enableBlur = repo.enableBlur
             val enableFloatingBottomBar = repo.enableFloatingBottomBar
             val enableFloatingBottomBarBlur = repo.enableFloatingBottomBarBlur
-            val enableNavigationBadge = repo.enableNavigationBadge
             val pageScale = repo.pageScale
             val enableWebDebugging = repo.enableWebDebugging
             val colorStyle = repo.colorStyle
@@ -80,7 +79,6 @@ class SettingsViewModel(
                     enableBlur = enableBlur,
                     enableFloatingBottomBar = enableFloatingBottomBar,
                     enableFloatingBottomBarBlur = enableFloatingBottomBarBlur,
-                    enableNavigationBadge = enableNavigationBadge,
                     pageScale = pageScale,
                     enableWebDebugging = enableWebDebugging,
                     colorStyle = colorStyle,
@@ -207,11 +205,6 @@ class SettingsViewModel(
     fun setEnableFloatingBottomBarBlur(enabled: Boolean) {
         repo.enableFloatingBottomBarBlur = enabled
         _uiState.update { it.copy(enableFloatingBottomBarBlur = enabled) }
-    }
-
-    fun setEnableNavigationBadge(enabled: Boolean) {
-        repo.enableNavigationBadge = enabled
-        _uiState.update { it.copy(enableNavigationBadge = enabled) }
     }
 
     fun setPageScale(scale: Float) {

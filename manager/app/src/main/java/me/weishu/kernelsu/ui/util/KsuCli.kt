@@ -91,13 +91,13 @@ fun createRootShell(globalMnt: Boolean = false): Shell {
     }
 }
 
-fun execKsud(args: String, newShell: Boolean = false, globalMnt: Boolean = false): Boolean {
+fun execKsud(args: String, newShell: Boolean = false): Boolean {
     return if (newShell) {
-        withNewRootShell(globalMnt = globalMnt) {
+        withNewRootShell {
             ShellUtils.fastCmdResult(this, "${getKsuDaemonPath()} $args")
         }
     } else {
-        ShellUtils.fastCmdResult(getRootShell(globalMnt), "${getKsuDaemonPath()} $args")
+        ShellUtils.fastCmdResult(getRootShell(), "${getKsuDaemonPath()} $args")
     }
 }
 
@@ -119,7 +119,7 @@ suspend fun getFeaturePersistValue(feature: String): Long? = withContext(Dispatc
 fun install() {
     val start = SystemClock.elapsedRealtime()
     val libadbroot = File(ksuApp.applicationInfo.nativeLibraryDir, "libadbroot.so").absolutePath
-    val result = execKsud("install --libadbroot $libadbroot --data-path ${ksuApp.applicationInfo.deviceProtectedDataDir}", true)
+    val result = execKsud("install --libadbroot $libadbroot", true)
     Log.w(TAG, "install result: $result, cost: ${SystemClock.elapsedRealtime() - start}ms")
 }
 
@@ -270,7 +270,6 @@ fun installBoot(
     partition: String?,
     allowShell: Boolean,
     enableAdb: Boolean,
-    forceBackup: Boolean,
     onStdout: (String) -> Unit,
     onStderr: (String) -> Unit,
 ): FlashResult {
@@ -306,10 +305,6 @@ fun installBoot(
 
     if (ota) {
         cmd += " -u"
-    }
-
-    if (forceBackup) {
-        cmd += " --backup"
     }
 
     var lkmFile: File? = null
@@ -362,7 +357,7 @@ fun installBoot(
 
 fun reboot(reason: String = "") {
     if (reason == "soft_reboot") {
-        execKsud("soft-reboot", true, true)
+        execKsud("soft-reboot", true)
         return
     }
     val shell = getRootShell()
@@ -473,8 +468,8 @@ fun getAppProfileTemplate(id: String): String {
 
 fun setAppProfileTemplate(id: String, template: String): Boolean {
     val shell = getRootShell()
-    val escapedTemplate = template.replace("'", "'\\''")
-    val cmd = """${getKsuDaemonPath()} profile set-template "$id" '$escapedTemplate'"""
+    val escapedTemplate = template.replace("\"", "\\\"")
+    val cmd = """${getKsuDaemonPath()} profile set-template "$id" "$escapedTemplate'""""
     return shell.newJob().add(cmd)
         .to(ArrayList(), null).exec().isSuccess
 }

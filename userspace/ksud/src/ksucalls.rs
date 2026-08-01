@@ -9,8 +9,6 @@ use std::sync::OnceLock;
 // Global driver fd cache
 static DRIVER_FD: OnceLock<RawFd> = OnceLock::new();
 static INFO_CACHE: OnceLock<ksu_uapi::ksu_get_info_cmd> = OnceLock::new();
-const KSU_INSTALL_MAGIC1_LEGACY: libc::c_ulong = 0xDEADBEEF;
-const KSU_INSTALL_MAGIC2_LEGACY: libc::c_ulong = 0xCAFEBABE;
 
 fn scan_driver_fd() -> Option<RawFd> {
     let fd_dir = fs::read_dir("/proc/self/fd").ok()?;
@@ -44,17 +42,6 @@ fn init_driver_fd() -> Option<RawFd> {
                 &mut fd,
             );
         };
-        if fd < 0 {
-            unsafe {
-                libc::syscall(
-                    libc::SYS_reboot,
-                    KSU_INSTALL_MAGIC1_LEGACY,
-                    KSU_INSTALL_MAGIC2_LEGACY,
-                    0,
-                    &mut fd,
-                );
-            };
-        }
         if fd >= 0 { Some(fd) } else { None }
     } else {
         fd
@@ -100,33 +87,8 @@ pub fn is_late_load() -> bool {
     get_info().flags & ksu_uapi::KSU_GET_INFO_FLAG_LATE_LOAD != 0
 }
 
-pub fn is_lkm() -> bool {
-    get_info().flags & ksu_uapi::KSU_GET_INFO_FLAG_LKM != 0
-}
-
-pub const fn uapi_version() -> u32 {
-    ksu_uapi::KERNEL_SU_UAPI_VERSION
-}
-
-pub fn runtime_mode() -> &'static str {
-    if is_late_load() {
-        "late-load"
-    } else if is_lkm() {
-        "lkm"
-    } else {
-        "built-in"
-    }
-}
-
-pub fn ensure_uapi_version_matched() -> anyhow::Result<()> {
-    let kernel_uapi = get_info().uapi_version;
-    let userspace_uapi = uapi_version();
-    if kernel_uapi != userspace_uapi {
-        bail!(
-            "UAPI version mismatch: kernel={kernel_uapi}, ksud={userspace_uapi}. Please update KernelSU!"
-        );
-    }
-    Ok(())
+pub fn is_uapi_version_mismatch() -> bool {
+    get_info().uapi_version != ksu_uapi::KERNEL_SU_UAPI_VERSION
 }
 
 pub fn grant_root() -> std::io::Result<()> {

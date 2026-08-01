@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.KsuIsValid
+import me.weishu.kernelsu.ui.util.reboot
 
 @Composable
 fun RebootDropdownItems(onItemClick: (String) -> Unit) {
@@ -36,8 +37,6 @@ fun RebootListPopupMaterial() {
     var expanded by remember { mutableStateOf(false) }
 
     KsuIsValid {
-        val onReboot = rememberRebootAction()
-
         IconButton(onClick = { expanded = true }) {
             Icon(
                 imageVector = Icons.Filled.PowerSettingsNew,
@@ -52,7 +51,7 @@ fun RebootListPopupMaterial() {
             DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
                 RebootDropdownItems { reason ->
                     expanded = false
-                    onReboot(reason)
+                    reboot(reason)
                 }
             }
         }
